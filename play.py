@@ -8,7 +8,18 @@ def maybe_positions(position: tuple[int, int]) -> list[tuple[int, int]]:
     Возврат возможных успешных позиций для первой точки.
     Возвращает список из 4 позиция (справа, справа-сверху, сверху, слева-сверху)
     """
-    return [(5, 4), (), (), ()]
+    new_positions = []
+    next_row = position[0] - 1
+    next_col = position[1] + 1
+    prev_col = position[1] - 1
+    if next_row >= 0:
+        new_positions.append([[next_row, position[1]]])
+        if prev_col >= 0:
+            new_positions.append([[next_row, prev_col]])
+        if next_col <= field_size[1]:
+            new_positions.append([[next_row, next_col]])
+            new_positions.append([[position[0], next_col]])
+    return new_positions
 
 
 def check_player_position(player: str, position: tuple[int, int]):
@@ -92,6 +103,9 @@ def new_state(player: int, column: int):
 #     a = input(f"Игрок 1, еще раз (1-{field_size[1]})")
 
 def run(player, column):
+    """
+    Обновление хода - обновляем текущее состояние поля и ищем победителя
+    """
     new_state(player, column)
     is_winner = search_winner(player)
 
