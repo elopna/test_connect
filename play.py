@@ -41,12 +41,13 @@ def check_player_position(player: str, position: tuple[int, int]):
 
 def maybe_direct_position(position1: tuple[int, int], position2: tuple[int, int]) -> tuple[int, int]:
     """Возврат третьей точки по направлению предыдущих двух
+
     Args:
         position1: tuple[int, int] - позиция первой точки
         position2: tuple[int, int] - позиция второй точки
 
     Return:
-        третья точка
+        третья точка, продолжающая 2 переданные
     """
     if (position2[1] - position1[1] != 0) and (position2[0] - position1[0] != 0):
         if (position2[1] - position1[1] == 0):
@@ -62,7 +63,7 @@ def search_winner(player: bool) -> bool:
     """Проверка пользователя на факт его победы
     
     Args:
-        player: str - игрок
+        player: bool - игрок
         
     Returns:
         True если игрок выиграл
@@ -92,7 +93,11 @@ def search_winner(player: bool) -> bool:
 
 def new_state(player: bool, column: int):
     """
-    Обновление после ввода
+    Обновление после очередного хода
+
+    Args:
+        player: bool - игрок
+        column: int - ход
     """
     new_column: int = column - 1
     for index, row in enumerate(state[::-1]):
@@ -105,6 +110,9 @@ def new_state(player: bool, column: int):
             break
 
 def check_input(line, player):
+    """
+    Проверка введенного значения
+    """
     if line.lower() == "stop":
         print("Стоп-игра!")
         exit()
@@ -115,7 +123,7 @@ def check_input(line, player):
 
 def run():
     """
-    Обновление хода - обновляем текущее состояние поля и ищем победителя
+    Ход, обновление поля, поиск победителя
     """
     game_is_active = True
     player = False
@@ -126,6 +134,12 @@ def run():
         player = not player
 
 def make_turn(player):
+    """
+    Ход и проверка введенного значения
+
+    Args:
+    player: bool - игрок
+    """
     a = 0
     while a == 0:
         a = input(f"Игрок {int(player) + 1}, Ваш ход (1-{field_size[1]}): ")
