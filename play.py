@@ -1,7 +1,9 @@
 import numpy as np
+from sys import exit
 
 field_size = (6, 7)
 state = np.full(field_size, " ")
+
 
 def maybe_positions(position: tuple[int, int]) -> list[tuple[int, int]]:
     """
@@ -13,12 +15,12 @@ def maybe_positions(position: tuple[int, int]) -> list[tuple[int, int]]:
     next_col = position[1] + 1
     prev_col = position[1] - 1
     if next_row >= 0:
-        new_positions.append([[next_row, position[1]]])
+        new_positions.append([next_row, position[1]])
         if prev_col >= 0:
-            new_positions.append([[next_row, prev_col]])
+            new_positions.append([next_row, prev_col])
         if next_col <= field_size[1]:
-            new_positions.append([[next_row, next_col]])
-            new_positions.append([[position[0], next_col]])
+            new_positions.append([next_row, next_col])
+            new_positions.append([position[0], next_col])
     return new_positions
 
 
@@ -30,6 +32,7 @@ def check_player_position(player: str, position: tuple[int, int]):
         player: str - игрок
         position: проверяемая позиция
     """
+    # player = str(player)
     row = position[0]
     column = position[1]
     if state[row][column] == player:
@@ -55,7 +58,7 @@ def maybe_direct_position(position1: tuple[int, int], position2: tuple[int, int]
     if (position2[0] - position1[0] == 0) and (position2[1] - position1[1] != 0):
             return [position2[0], position2[1] + 1]
 
-def search_winner(player: str) -> bool:
+def search_winner(player: bool) -> bool:
     """Проверка пользователя на факт его победы
     
     Args:
@@ -65,9 +68,10 @@ def search_winner(player: str) -> bool:
         True если игрок выиграл
         False если нет
     """
+    player = str(int(player))
     player_max_score = 0
     for column_num, column in enumerate(state[::-1]):
-        column_num = 5 - column_num
+        column_num = field_size[0] - 1 - column_num
         for row_num, el in enumerate(column):
             if el == player:
                 player_max_score += 1
@@ -78,12 +82,15 @@ def search_winner(player: str) -> bool:
                         new_position = maybe_direct_position(start_position, position)
                         if check_player_position(player, new_position):
                             player_max_score += 1
-                            new_position = maybe_direct_position(start_position, position)
+                            new_position = maybe_direct_position(start_position, new_position)
                             if check_player_position(player, new_position):
-                                return True
-    return False
+                                game_is_active = False
+                                print(f"!!! Игрок {int(player) + 1} победил !!!")
+                                return True, game_is_active
+    game_is_active = True
+    return False, game_is_active
 
-def new_state(player: int, column: int):
+def new_state(player: bool, column: int):
     """
     Обновление после ввода
     """
@@ -92,33 +99,37 @@ def new_state(player: int, column: int):
         if row[new_column] != " ":
             continue
         else:
-            row[new_column] = player
+            row[new_column] = int(player)
             print(state)
+            print()
             break
 
+def check_input(line, player):
+    if line.lower() == "stop":
+        print("Стоп-игра!")
+        exit()
+    elif (not line.isdigit()) or (int(line) <= 0) or (int(line) > field_size[1]):
+        return 0
+    else:
+        return int(line)
 
-# a = input(f"Игрок 1, Ваш ход (1-{field_size[1]})")
-
-# if a < 0 or a > field_size[1]:
-#     a = input(f"Игрок 1, еще раз (1-{field_size[1]})")
-
-def run(player, column):
+def run():
     """
     Обновление хода - обновляем текущее состояние поля и ищем победителя
     """
-    new_state(player, column)
-    is_winner = search_winner(player)
+    game_is_active = True
+    player = False
+    while game_is_active:
+        current_turn = make_turn(player)
+        new_state(player, current_turn)
+        is_winner, game_is_active = search_winner(player)
+        player = not player
 
-# b = input(f"Игрок 2, Ваш ход (1-{field_size[1]})")
+def make_turn(player):
+    a = 0
+    while a == 0:
+        a = input(f"Игрок {int(player) + 1}, Ваш ход (1-{field_size[1]}): ")
+        a = check_input(a, player)
+    return a
 
-            
-
-if __name__ == "__main__":
-    from argparse import ArgumentParser
-    parser = ArgumentParser()
-    parser.add_argument("--player_number", dest="player_number", help="player_number")
-    parser.add_argument("--column_number", dest="column_number", help="column_number path")
-    args = parser.parse_args()
-
-
-    run(args.player_number, args.column_number)
+run()
